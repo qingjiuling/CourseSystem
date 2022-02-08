@@ -13,7 +13,7 @@ func RegisterRouter(r *gin.Engine) {
 	g.GET("/member/list", GetMemberList)
 	g.POST("/member/update", UpdateMember)
 	g.POST("/member/delete", DeleteMember)
-
+	//sdfsdg
 	// 登录
 
 	g.POST("/auth/login", Login)
