@@ -13,7 +13,6 @@ func main() {
 	defer db_op.SqlClose()
 	db_op.RedisInit()
 	defer db_op.RedisClose()
-	defer fmt.Println(1123)
 	conn := db_op.MysqlDb
 	// 不要复数表名
 	conn.SingularTable(true)
