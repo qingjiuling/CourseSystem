@@ -14,6 +14,7 @@ func main() {
 	db_op.RedisInit()
 	defer db_op.RedisClose()
 	conn := db_op.MysqlDb
+	fmt.Println(46489)
 	// 不要复数表名
 	conn.SingularTable(true)
 
