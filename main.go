@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	//test123
 	db_op.SqlInit()
 	defer db_op.SqlClose()
 	db_op.RedisInit()
