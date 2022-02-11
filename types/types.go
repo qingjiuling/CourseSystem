@@ -54,6 +54,7 @@ type MemberSql struct {
 	Deleted  bool `gorm:"default:true"`
 }
 
+//as
 type CourseSql struct {
 	CourseID   int64 `gorm:"primary_key;auto_increment"`
 	CourseName string
