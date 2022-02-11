@@ -41,6 +41,7 @@ func CreateMember(c *gin.Context) {
 	if len(nickname) < 4 || len(nickname) > 20 {
 		response.Code = ParamInvalid
 		//fmt.Println(2)
+		// 为什么这里不直接加return
 		c.JSON(http.StatusBadRequest, response)
 	}
 	if len(username) < 8 || len(username) > 20 {
@@ -72,6 +73,7 @@ func CreateMember(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response)
 		return
 	} else {
+		// 不确定是否不允许其它字符
 		flag1 := false
 		flag2 := false
 		flag3 := false
