@@ -14,7 +14,7 @@ func CreateMember(c *gin.Context) {
 	//根据cookie判断是否已登录
 	if err != nil {
 		response.Code = LoginRequired
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	//获取操作者个人信息
@@ -24,14 +24,14 @@ func CreateMember(c *gin.Context) {
 	conn.Where("username = ?", usernameRe).First(&memberSql)
 	if memberSql.UserType != Admin {
 		response.Code = PermDenied
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	//获取昵称、用户名、密码、用户类型等信息
 	if err := c.ShouldBindJSON(&request); err != nil {
 		response.Code = ParamInvalid
 		//fmt.Println(1)
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	nickname := request.Nickname
@@ -42,12 +42,12 @@ func CreateMember(c *gin.Context) {
 		response.Code = ParamInvalid
 		//fmt.Println(2)
 		// 为什么这里不直接加return
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 	}
 	if len(username) < 8 || len(username) > 20 {
 		response.Code = ParamInvalid
 		//fmt.Println(3)
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 	} else {
 		for _, ch := range username {
 			if (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') {
@@ -55,7 +55,7 @@ func CreateMember(c *gin.Context) {
 			} else {
 				//fmt.Println(4, ch)
 				response.Code = ParamInvalid
-				c.JSON(http.StatusBadRequest, response)
+				c.JSON(http.StatusOK, response)
 				return
 			}
 		}
@@ -64,13 +64,13 @@ func CreateMember(c *gin.Context) {
 	conn.Where("username = ?", username).Find(&members)
 	if len(members) == 1 {
 		response.Code = UserHasExisted
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	if len(password) < 8 || len(password) > 20 {
 		//fmt.Println(5)
 		response.Code = ParamInvalid
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	} else {
 		// 不确定是否不允许其它字符
@@ -90,7 +90,7 @@ func CreateMember(c *gin.Context) {
 		}
 		if !(flag1 && flag2 && flag3) {
 			response.Code = ParamInvalid
-			c.JSON(http.StatusBadRequest, response)
+			c.JSON(http.StatusOK, response)
 			//fmt.Println(6, flag1, flag2, flag3)
 			return
 		}
@@ -99,7 +99,7 @@ func CreateMember(c *gin.Context) {
 	if usertype != Admin && usertype != Student && usertype != Teacher {
 		//fmt.Println(7)
 		response.Code = ParamInvalid
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	var member = MemberSql{Nickname: nickname, Username: username, UserType: usertype, PassWord: password}
@@ -113,10 +113,10 @@ func CreateMember(c *gin.Context) {
 func GetMember(c *gin.Context) {
 	var request GetMemberRequest
 	var response GetMemberResponse
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := c.ShouldBindUri(&request); err != nil {
 		response.Code = ParamInvalid
 		//fmt.Println(1)
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	userid, _ := strconv.ParseInt(request.UserID, 10, 64)
@@ -125,12 +125,12 @@ func GetMember(c *gin.Context) {
 	conn.Where("user_id = ?", userid).Find(&members)
 	if len(members) == 0 {
 		response.Code = UserNotExisted
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	if members[0].Deleted == false {
 		response.Code = UserHasDeleted
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	response.Code = OK
@@ -144,10 +144,10 @@ func GetMember(c *gin.Context) {
 func GetMemberList(c *gin.Context) {
 	var request GetMemberListRequest
 	var response GetMemberListResponse
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := c.ShouldBindUri(&request); err != nil {
 		response.Code = ParamInvalid
 		//fmt.Println(1)
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	limit := request.Limit
@@ -174,7 +174,7 @@ func UpdateMember(c *gin.Context) {
 	if err := c.ShouldBindJSON(&request); err != nil {
 		response.Code = ParamInvalid
 		//fmt.Println(1)
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	//userid查询
@@ -184,14 +184,14 @@ func UpdateMember(c *gin.Context) {
 	var member MemberSql
 	if conn.Where("user_id = ?", userid).First(&member).RecordNotFound() {
 		response.Code = UserNotExisted
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	//判断new nickname是否正确
 	if len(nickname) < 4 || len(nickname) > 20 {
 		response.Code = ParamInvalid
 		//fmt.Println(2)
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 	}
 	//更新nickname
 	conn.Model(&member).UpdateColumn("nickname", nickname)
@@ -206,7 +206,7 @@ func DeleteMember(c *gin.Context) {
 	if err := c.ShouldBindJSON(&request); err != nil {
 		response.Code = ParamInvalid
 		//fmt.Println(1)
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	//userid查询
@@ -215,12 +215,12 @@ func DeleteMember(c *gin.Context) {
 	var member MemberSql
 	if conn.Where("user_id = ?", userid).First(&member).RecordNotFound() {
 		response.Code = UserNotExisted
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	if member.Deleted == false {
 		response.Code = UserHasDeleted
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	//更新nickname

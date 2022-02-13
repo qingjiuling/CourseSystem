@@ -13,38 +13,38 @@ import (
 
 func Login(c *gin.Context) {
 
-	var json LoginRequest
+	var request LoginRequest
 	var response LoginResponse
 
 	// 将request的body中的数据，自动按照json格式解析到结构体
-	if err := c.ShouldBindJSON(&json); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		response.Code = ParamInvalid
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
-	username := json.Username
-	password := json.Password
+	username := request.Username
+	password := request.Password
 	conn := db_op.MysqlDb
 	var memberSql MemberSql
 
 	// 根据username查表，若无匹配则return
 	if err := conn.Where("username = ?", username).First(&memberSql).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		response.Code = UserNotExisted
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 
 	// 查看是否已删除
 	if memberSql.Deleted == false {
 		response.Code = UserHasDeleted
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 
 	// 查看密码是否正确
 	if memberSql.PassWord != password {
 		response.Code = WrongPassword
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 
@@ -62,7 +62,7 @@ func Logout(c *gin.Context) {
 	//根据cookie判断是否已登录
 	if err != nil {
 		response.Code = LoginRequired
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	//清除cookie
@@ -78,7 +78,7 @@ func Whoami(c *gin.Context) {
 	//根据cookie判断是否已登录
 	if err != nil {
 		response.Code = LoginRequired
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	//获取个人信息
