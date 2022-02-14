@@ -136,31 +136,55 @@ func GetTeacherCourse(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+var teCoRe map[string][]string
+var coTeRe map[string]string
+var visited map[string]bool
+
 func ScheduleCourse(c *gin.Context) {
-	/*
-		var request ScheduleCourseRequest
-		var response ScheduleCourseResponse
-		if err := c.ShouldBindJSON(&request); err != nil {
-			response.Code = ParamInvalid
-			//fmt.Println(1)
-			c.JSON(http.StatusOK, response)
-			return
-		}
-		teCoRe := request.TeacherCourseRelationShip //获取老师到课程的关系表
-		coTeRe := make(map[string][]string)         //建立课程到老师的关系表
-		for teacher := range teCoRe {
-			courses := teCoRe[teacher]
-			for _, course := range courses {
-				key := course
-				value, ok := coTeRe[key]
-				if !ok {
-					value = make([]string, 0, 2)
-				}
-				value = append(value, teacher)
-				coTeRe[key] = value
+
+	var request ScheduleCourseRequest
+	var response ScheduleCourseResponse
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		response.Code = ParamInvalid
+		//fmt.Println(1)
+		c.JSON(http.StatusOK, response)
+		return
+	}
+	teCoRe = request.TeacherCourseRelationShip //获取老师到课程的关系表
+	coTeRe = make(map[string]string)           //建立课程到老师的匹配
+	for teacher := range teCoRe {
+		visited = make(map[string]bool)
+		dfs(teacher)
+	}
+	ret := make(map[string]string)
+	for course := range coTeRe {
+		ret[coTeRe[course]] = course
+	}
+
+	//rret := make(map[string][]string)
+	//rret["1"] = []string{"1", "2"}
+	//rret["2"] = []string{"1", "2"}
+	//rret["3"] = []string{"1", "3"}
+	//rret["4"] = []string{"3", "4"}
+	response.Code = OK
+	response.Data = ret
+
+	c.JSON(http.StatusOK, response)
+
+}
+
+func dfs(teacher string) bool {
+	courses := teCoRe[teacher]
+	for _, course := range courses {
+		if _, ok := visited[course]; !ok {
+			visited[course] = true
+			nTeacher, ok := coTeRe[course]
+			if (!ok) || dfs(nTeacher) {
+				coTeRe[course] = teacher
+				return true
 			}
 		}
-
-	*/
-
+	}
+	return false
 }
