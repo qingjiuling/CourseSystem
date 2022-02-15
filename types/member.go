@@ -43,6 +43,7 @@ func CreateMember(c *gin.Context) {
 		//fmt.Println(2)
 		// 为什么这里不直接加return
 		c.JSON(http.StatusOK, response)
+		return
 	}
 	if len(username) < 8 || len(username) > 20 {
 		response.Code = ParamInvalid

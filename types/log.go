@@ -49,7 +49,7 @@ func Login(c *gin.Context) {
 	}
 
 	// 设置cookie
-	c.SetCookie("camp-session", username, 10000, "/", "127.0.0.1", false, true)
+	c.SetCookie("camp-session", username, 10000, "/", "180.184.70.161", false, true)
 	response.Code = OK
 	response.Data.UserID = strconv.FormatInt(memberSql.UserID, 10)
 	c.JSON(http.StatusOK, response)
@@ -66,7 +66,7 @@ func Logout(c *gin.Context) {
 		return
 	}
 	//清除cookie
-	c.SetCookie("camp-session", cookie, -1, "/", "127.0.0.1", false, true)
+	c.SetCookie("camp-session", cookie, -1, "/", "180.184.70.161", false, true)
 
 	response.Code = OK
 	c.JSON(http.StatusOK, response)
