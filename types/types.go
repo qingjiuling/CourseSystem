@@ -61,12 +61,6 @@ type CourseSql struct {
 	Cap        int
 }
 
-type BookCourseSql struct {
-	Id        int64 `gorm:"primary_key;auto_increment"`
-	StudentID int64
-	CourseID  int64
-}
-
 // -----------------------------------
 
 // 成员管理

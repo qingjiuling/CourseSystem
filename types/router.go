@@ -9,7 +9,7 @@ func RegisterRouter(r *gin.Engine) {
 
 	// 成员管理
 	g.POST("/member/create", CreateMember)
-	g.GET("/member/:UserID", GetMember)
+	g.GET("/member", GetMember)
 	g.GET("/member/list/:Offset/:Limit", GetMemberList)
 	g.POST("/member/update", UpdateMember)
 	g.POST("/member/delete", DeleteMember)

@@ -112,15 +112,8 @@ func CreateMember(c *gin.Context) {
 }
 
 func GetMember(c *gin.Context) {
-	var request GetMemberRequest
 	var response GetMemberResponse
-	if err := c.ShouldBindUri(&request); err != nil {
-		response.Code = ParamInvalid
-		//fmt.Println(1)
-		c.JSON(http.StatusOK, response)
-		return
-	}
-	userid, _ := strconv.ParseInt(request.UserID, 10, 64)
+	userid, _ := strconv.ParseInt(c.Query("UserID"), 10, 64)
 	conn := db_op.MysqlDb
 	var members []MemberSql
 	conn.Where("user_id = ?", userid).Find(&members)

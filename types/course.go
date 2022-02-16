@@ -18,14 +18,17 @@ func CreateCourse(c *gin.Context) {
 	}
 	courseCap := request.Cap
 	courseName := request.Name
+	rdb := db_op.RedisDb.Get()
+	defer rdb.Close()
 	conn := db_op.MysqlDb
 	var course = CourseSql{CourseName: courseName, Cap: courseCap}
 	conn.Create(&course)
 	conn.Where("courseName'?", courseName).Last(&course)
 	response.Code = OK
 	response.Data.CourseID = strconv.FormatInt(course.CourseID, 10)
+	// 将课程容量存储在redis中
+	rdb.Do("Set", response.Data.CourseID, courseCap)
 	c.JSON(http.StatusOK, response)
-
 }
 
 func GetCourse(c *gin.Context) {

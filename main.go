@@ -3,7 +3,6 @@ package main
 import (
 	"awesomeProject/db_op"
 	"awesomeProject/types"
-	"fmt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -61,16 +60,16 @@ func main() {
 	//} else {
 	//	fmt.Println("表已存在")
 	//}
-	c := db_op.RedisDb.Get()
-	_, err := c.Do("Set", 1, 1)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	c.Close()
+	//c := db_op.RedisDb.Get()
+	//_, err := c.Do("Set", 1, 1)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
+	//c.Close()
 	// 1.创建路由
 	r := gin.Default()
 	types.RegisterRouter(r)
-	r.Run(":8080")
+	r.Run(":80")
 
 }
