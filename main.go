@@ -31,7 +31,7 @@ func main() {
 	//var member = types.MemberSql{Nickname: "JudgeAdmin", Username: "JudgeAdmin", UserType: 1, PassWord: "JudgePassword2022"}
 	//db_op.MysqlDb.Create(&member)
 	//
-	//// 借助 gorm 创建数据库表.
+	// 借助 gorm 创建数据库表.
 	//conn.AutoMigrate(&types.CourseSql{})
 	//
 	//if !conn.HasTable(types.CourseSql{}) {

@@ -27,14 +27,14 @@ func CreateCourse(c *gin.Context) {
 	response.Code = OK
 	response.Data.CourseID = strconv.FormatInt(course.CourseID, 10)
 	// 将课程容量存储在redis中
-	rdb.Do("Set", response.Data.CourseID, courseCap)
+	rdb.Do("Set", "course_"+response.Data.CourseID, courseCap)
 	c.JSON(http.StatusOK, response)
 }
 
 func GetCourse(c *gin.Context) {
 	var request GetCourseRequest
 	var response GetCourseResponse
-	if err := c.ShouldBindUri(&request); err != nil {
+	if err := c.ShouldBindQuery(&request); err != nil {
 		response.Code = ParamInvalid
 		//fmt.Println(1)
 		c.JSON(http.StatusOK, response)
@@ -117,7 +117,7 @@ func UnbindCourse(c *gin.Context) {
 func GetTeacherCourse(c *gin.Context) {
 	var request GetTeacherCourseRequest
 	var response GetTeacherCourseResponse
-	if err := c.ShouldBindUri(&request); err != nil {
+	if err := c.ShouldBindQuery(&request); err != nil {
 		response.Code = ParamInvalid
 		//fmt.Println(1)
 		c.JSON(http.StatusOK, response)

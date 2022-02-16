@@ -14,7 +14,7 @@ func BookCourse(c *gin.Context) {
 	var response BookCourseResponse
 	if err := c.ShouldBindJSON(&request); err != nil {
 		response.Code = ParamInvalid
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	// 从redis线程池取一个线程
@@ -26,46 +26,46 @@ func BookCourse(c *gin.Context) {
 	courseID, err := strconv.ParseInt(request.CourseID, 10, 64)
 	if err != nil {
 		response.Code = ParamInvalid
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	//将studentID转换为整形
 	studentID, err := strconv.ParseInt(request.StudentID, 10, 64)
 	if err != nil {
 		response.Code = ParamInvalid
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
+		return
+	}
+	//检查学生是否存在
+	var student MemberSql
+	if conn.Where("user_id=? AND user_type=?", studentID, 2).First(&student).RecordNotFound() {
+		response.Code = StudentNotExisted
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	//检查课程是否存在
 	var course CourseSql
 	if conn.Where("course_id=?", courseID).First(&course).RecordNotFound() {
 		response.Code = CourseNotExisted
-		c.JSON(http.StatusBadRequest, response)
-		return
-	}
-	//检查学生是否存在
-	var student MemberSql
-	if conn.Where("user_id=?,user_type=?", studentID, 2).First(&student).RecordNotFound() {
-		response.Code = StudentNotExisted
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	//检查学生是否已经选上该课程
-	tmp1, _ := redis.Int(rdb.Do("SISMEMBER", studentID, courseID))
+	tmp1, _ := redis.Int(rdb.Do("SISMEMBER", "student_"+request.StudentID, courseID))
 	if tmp1 == 1 {
 		response.Code = StudentHasCourse
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	//利用DECR来减少库存，防止读写分离
-	tmp2, _ := redis.Int(rdb.Do("DECR", courseID))
+	tmp2, _ := redis.Int(rdb.Do("DECR", "course_"+request.CourseID))
 	if tmp2 < 0 {
 		response.Code = CourseNotAvailable
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	// 将选的课插进学生的集合里
-	_, err = rdb.Do("SADD", studentID, courseID)
+	_, err = rdb.Do("SADD", "student_"+request.StudentID, courseID)
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -76,9 +76,9 @@ func BookCourse(c *gin.Context) {
 func GetStudentCourse(c *gin.Context) {
 	var request GetStudentCourseRequest
 	var response GetStudentCourseResponse
-	if err := c.ShouldBindUri(&request); err != nil {
+	if err := c.ShouldBindQuery(&request); err != nil {
 		response.Code = ParamInvalid
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	// 从redis线程池取一个线程
@@ -89,22 +89,23 @@ func GetStudentCourse(c *gin.Context) {
 	studentID, err := strconv.ParseInt(request.StudentID, 10, 64)
 	if err != nil {
 		response.Code = ParamInvalid
-		c.JSON(http.StatusBadRequest, response)
-		return
-	}
-	//先来判断学生是否有课程
-	courses, err := redis.Ints(rdb.Do("SMEMBERS", studentID))
-	courses_len := len(courses)
-	if courses_len == 0 {
-		response.Code = StudentHasNoCourse
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	//再来判断学生是否存在
 	var student MemberSql
-	if conn.Where("user_id=?,user_type=?", studentID, 2).First(&student).RecordNotFound() {
+	if conn.Where("user_id=? AND user_type=?", studentID, 2).First(&student).RecordNotFound() {
 		response.Code = StudentNotExisted
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
+		return
+	}
+	//先来判断学生是否有课程
+	courses, err := redis.Ints(rdb.Do("SMEMBERS", "student_"+request.StudentID))
+	courses_len := len(courses)
+	fmt.Println(courses_len)
+	if courses_len == 0 {
+		response.Code = StudentHasNoCourse
+		c.JSON(http.StatusOK, response)
 		return
 	}
 	tCourses := make([]TCourse, courses_len)
