@@ -21,7 +21,7 @@ func CreateCourse(c *gin.Context) {
 	conn := db_op.MysqlDb
 	var course = CourseSql{CourseName: courseName, Cap: courseCap}
 	conn.Create(&course)
-	conn.Where("courseName'?", courseName).First(&course)
+	conn.Where("courseName'?", courseName).Last(&course)
 	response.Code = OK
 	response.Data.CourseID = strconv.FormatInt(course.CourseID, 10)
 	c.JSON(http.StatusOK, response)

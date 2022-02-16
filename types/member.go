@@ -106,7 +106,7 @@ func CreateMember(c *gin.Context) {
 	var member = MemberSql{Nickname: nickname, Username: username, UserType: usertype, PassWord: password}
 	db_op.MysqlDb.Create(&member)
 	response.Code = OK
-	conn.Where("username = ?", username).First(&member)
+	conn.Where("username = ?", username).Last(&member)
 	response.Data.UserID = strconv.FormatInt(member.UserID, 10)
 	c.JSON(http.StatusOK, response)
 }
