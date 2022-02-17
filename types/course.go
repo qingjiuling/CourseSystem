@@ -2,6 +2,7 @@ package types
 
 import (
 	"awesomeProject/db_op"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -28,6 +29,10 @@ func CreateCourse(c *gin.Context) {
 	response.Data.CourseID = strconv.FormatInt(course.CourseID, 10)
 	// 将课程容量存储在redis中
 	rdb.Do("Set", "course_"+response.Data.CourseID, courseCap)
+	_, err := rdb.Do("SADD", "courseList", response.Data.CourseID)
+	if err != nil {
+		fmt.Print(err)
+	}
 	c.JSON(http.StatusOK, response)
 }
 

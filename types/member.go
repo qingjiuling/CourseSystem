@@ -2,6 +2,7 @@ package types
 
 import (
 	"awesomeProject/db_op"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -108,6 +109,14 @@ func CreateMember(c *gin.Context) {
 	response.Code = OK
 	conn.Where("username = ?", username).Last(&member)
 	response.Data.UserID = strconv.FormatInt(member.UserID, 10)
+	if usertype == Student {
+		rdb := db_op.RedisDb.Get()
+		defer rdb.Close()
+		_, err = rdb.Do("SADD", "studentList", response.Data.UserID)
+		if err != nil {
+			fmt.Print(err)
+		}
+	}
 	c.JSON(http.StatusOK, response)
 }
 

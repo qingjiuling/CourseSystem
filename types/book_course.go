@@ -21,7 +21,7 @@ func BookCourse(c *gin.Context) {
 	rdb := db_op.RedisDb.Get()
 	defer rdb.Close()
 	// 与mysql建立连接
-	conn := db_op.MysqlDb
+	//conn := db_op.MysqlDb
 	//将couurseID转换为整形
 	courseID, err := strconv.ParseInt(request.CourseID, 10, 64)
 	if err != nil {
@@ -37,19 +37,31 @@ func BookCourse(c *gin.Context) {
 		return
 	}
 	//检查学生是否存在
-	var student MemberSql
-	if conn.Where("user_id=? AND user_type=?", studentID, 2).First(&student).RecordNotFound() {
+	tmp, _ := redis.Int(rdb.Do("SISMEMBER", "studentList", studentID))
+	if tmp == 0 {
 		response.Code = StudentNotExisted
 		c.JSON(http.StatusOK, response)
 		return
 	}
+	//var student MemberSql
+	//if conn.Where("user_id=? AND user_type=?", studentID, 2).First(&student).RecordNotFound() {
+	//	response.Code = StudentNotExisted
+	//	c.JSON(http.StatusOK, response)
+	//	return
+	//}
 	//检查课程是否存在
-	var course CourseSql
-	if conn.Where("course_id=?", courseID).First(&course).RecordNotFound() {
+	tmp, _ = redis.Int(rdb.Do("SISMEMBER", "courseList", courseID))
+	if tmp == 0 {
 		response.Code = CourseNotExisted
 		c.JSON(http.StatusOK, response)
 		return
 	}
+	//var course CourseSql
+	//if conn.Where("course_id=?", courseID).First(&course).RecordNotFound() {
+	//	response.Code = CourseNotExisted
+	//	c.JSON(http.StatusOK, response)
+	//	return
+	//}
 	//检查学生是否已经选上该课程
 	tmp1, _ := redis.Int(rdb.Do("SISMEMBER", "student_"+request.StudentID, courseID))
 	if tmp1 == 1 {
