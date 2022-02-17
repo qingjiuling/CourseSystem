@@ -78,6 +78,8 @@ func GetStudentCourse(c *gin.Context) {
 	var response GetStudentCourseResponse
 	if err := c.ShouldBindQuery(&request); err != nil {
 		response.Code = ParamInvalid
+		tCourses := make([]TCourse, 0)
+		response.Data.CourseList = tCourses
 		c.JSON(http.StatusOK, response)
 		return
 	}
@@ -89,6 +91,8 @@ func GetStudentCourse(c *gin.Context) {
 	studentID, err := strconv.ParseInt(request.StudentID, 10, 64)
 	if err != nil {
 		response.Code = ParamInvalid
+		tCourses := make([]TCourse, 0)
+		response.Data.CourseList = tCourses
 		c.JSON(http.StatusOK, response)
 		return
 	}
@@ -96,6 +100,8 @@ func GetStudentCourse(c *gin.Context) {
 	var student MemberSql
 	if conn.Where("user_id=? AND user_type=?", studentID, 2).First(&student).RecordNotFound() {
 		response.Code = StudentNotExisted
+		tCourses := make([]TCourse, 0)
+		response.Data.CourseList = tCourses
 		c.JSON(http.StatusOK, response)
 		return
 	}
@@ -105,6 +111,8 @@ func GetStudentCourse(c *gin.Context) {
 	fmt.Println(courses_len)
 	if courses_len == 0 {
 		response.Code = StudentHasNoCourse
+		tCourses := make([]TCourse, 0)
+		response.Data.CourseList = tCourses
 		c.JSON(http.StatusOK, response)
 		return
 	}
